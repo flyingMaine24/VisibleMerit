@@ -1,11 +1,12 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import type { AnalyticsEvent, IntakeAnswers, Pack } from "@/lib/types";
 import { createQualityRubric } from "@/lib/editorial/standard";
 
 const now = () => new Date().toISOString();
-const localStorePath = process.env.VISIBLE_MERIT_STORE_PATH ?? join(tmpdir(), "visible-merit-local-store.json");
+const localStorePath =
+  process.env.VISIBLE_MERIT_STORE_PATH ??
+  join(/*turbopackIgnore: true*/ process.cwd(), ".visible-merit", "local-store.json");
 
 const demoAnswers: IntakeAnswers = {
   currentRole: "Ramp agent",
@@ -123,6 +124,7 @@ function readStore(): PersistedStore {
 }
 
 function writeStore(store: PersistedStore): void {
+  mkdirSync(dirname(localStorePath), { recursive: true });
   writeFileSync(localStorePath, JSON.stringify(store, null, 2));
 }
 

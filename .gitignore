@@ -1,4 +1,5 @@
 .next/
+.visible-merit/
 node_modules/
 dist/
 coverage/
