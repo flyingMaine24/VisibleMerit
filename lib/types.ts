@@ -56,6 +56,17 @@ export type QualityRubric = {
   evidenceSupported: QualityState;
 };
 
+export type WorkIdentitySnapshot = {
+  headline: string;
+  strengths: string[];
+  laneBridge: string;
+  proofConfidence: {
+    strongEvidence: string[];
+    needsMoreDetail: string[];
+    safeToUseNow: string[];
+  };
+};
+
 export type EvidenceWarning = {
   section: string;
   message: string;
@@ -64,7 +75,7 @@ export type EvidenceWarning = {
 
 export type PackSection = {
   id: string;
-  type: "skills" | "summary" | "bullets" | "linkedin" | "stories" | "plan";
+  type: "skills" | "summary" | "bullets" | "linkedin" | "stories" | "gaps" | "plan";
   title: string;
   content: string;
   accessLevel: SectionAccessLevel;
@@ -83,6 +94,7 @@ export type Pack = {
   qualityRubric: QualityRubric;
   intake?: IntakeAnswers;
   rolePreference?: RolePreference;
+  workIdentitySnapshot?: WorkIdentitySnapshot;
   roleRecommendations: RoleRecommendation[];
   selectedRoleTargetIds: string[];
   sections: PackSection[];

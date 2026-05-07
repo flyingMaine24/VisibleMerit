@@ -26,7 +26,7 @@ export default function RootLayout({
           <nav className="site-nav" aria-label="Primary navigation">
             <Link href="/intake">Start</Link>
             <Link href="/preview/demo-pack">Sample</Link>
-            <Link href="/login">Sign in</Link>
+            <Link href="/account">Account</Link>
           </nav>
         </header>
         {children}

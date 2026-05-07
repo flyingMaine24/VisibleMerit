@@ -19,19 +19,24 @@ describe("AI generation boundary", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
+      expect(result.output.workIdentitySnapshot.strengths).toContain("Coordination under pressure");
+      expect(result.output.workIdentitySnapshot.proofConfidence.strongEvidence.length).toBeGreaterThan(0);
       expect(result.output.roleRecommendations.length).toBeGreaterThan(0);
       expect(result.output.sections[0].accessLevel).toBe("preview");
       expect(result.output.qualityRubric.plainLanguage).toBe("Strong");
     }
   });
 
-  it("generates a full pack with paid sections", async () => {
-    const result = await generateFullPack(answers);
+  it("generates a full pack with paid sections for the primary lane", async () => {
+    const result = await generateFullPack(answers, "Operations Coordinator");
 
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.output.sections.length).toBeGreaterThanOrEqual(6);
       expect(result.output.sections.some((section) => section.accessLevel === "paid")).toBe(true);
+      expect(result.output.sections.find((section) => section.id === "summary")?.content).toContain("Operations Coordinator");
+      expect(result.output.sections.find((section) => section.id === "bullets")?.content.split("\n").length).toBeGreaterThanOrEqual(8);
+      expect(result.output.sections.some((section) => section.id === "gaps")).toBe(true);
     }
   });
 });

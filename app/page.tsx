@@ -1,48 +1,65 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ProofTransformation } from "@/components/ProofTransformation";
 
 export default function HomePage() {
+  const workflow = [
+    ["01", "Answer the work interview", "Role, pressure, systems, handoffs, proof moments, and the work you want next."],
+    ["02", "Review the free proof sample", "A short translation, role lanes, and a Visible Merit Check before payment."],
+    ["03", "Unlock the working pack", "Resume language, LinkedIn copy, interview stories, role gaps, and a 30-day plan."]
+  ];
+
+  const proofNotes = [
+    "Names the work without inflating it",
+    "Separates evidence from assumption",
+    "Shows fit and likely gaps by role lane",
+    "Keeps language usable in real hiring conversations"
+  ];
+
   return (
     <main>
       <section className="page-shell hero">
-        <div>
-          <p className="eyebrow">Visible Merit</p>
-          <h1>Real work, clearly seen.</h1>
+        <div className="hero-copy">
+          <p className="eyebrow">Hidden experience. Recognized merit.</p>
+          <h1>Visible Merit</h1>
           <p className="lead">
-            Turn frontline experience into credible career language you can use for corporate, leadership, and better-fit
-            opportunities.
+            Translate frontline work into credible career proof for the roles you are actually trying to reach.
           </p>
           <div className="cta-row">
             <Link className="button" href="/intake">
-              Start with your work <ArrowRight size={18} />
+              Start the work interview <ArrowRight size={18} aria-hidden="true" />
             </Link>
-            <Link className="button secondary" href="/preview/demo-pack">View sample pack</Link>
+            <Link className="button secondary" href="/preview/demo-pack">Open sample pack</Link>
+          </div>
+          <div className="hero-proof-strip" aria-label="Visible Merit principles">
+            {proofNotes.map((note) => (
+              <span key={note}>{note}</span>
+            ))}
           </div>
         </div>
-        <ProofTransformation />
+        <div className="hero-evidence">
+          <ProofTransformation />
+          <div className="mini-rubric" aria-label="Visible Merit check summary">
+            <span>Visible Merit Check</span>
+            <strong>Plain. Specific. Supported.</strong>
+          </div>
+        </div>
       </section>
 
-      <section className="band">
+      <section className="band process-band">
         <div className="narrow">
-          <p className="eyebrow">Hidden experience. Recognized merit.</p>
-          <h2>A pack built around what you actually did.</h2>
-          <div className="sample-grid">
-            <article className="artifact-panel">
-              <CheckCircle2 aria-hidden="true" />
-              <h3>Free mini artifact</h3>
-              <p>See two translated skills, role lanes, and a Visible Merit Check before paying.</p>
-            </article>
-            <article className="artifact-panel">
-              <CheckCircle2 aria-hidden="true" />
-              <h3>Story + Plan Pack</h3>
-              <p>Unlock resume language, LinkedIn copy, interview stories, role gaps, and a 30-day plan.</p>
-            </article>
-            <article className="artifact-panel">
-              <CheckCircle2 aria-hidden="true" />
-              <h3>No fake polish</h3>
-              <p>Evidence warnings and plain-language checks keep the output credible and defensible.</p>
-            </article>
+          <div className="section-heading">
+            <p className="eyebrow">Make real work visible.</p>
+            <h2>Built like an evidence review, not a resume prompt.</h2>
+          </div>
+          <div className="process-list">
+            {workflow.map(([step, title, body]) => (
+              <article className="process-row" key={step}>
+                <span>{step}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

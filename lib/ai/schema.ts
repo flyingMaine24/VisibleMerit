@@ -9,6 +9,17 @@ export const qualityRubricSchema = z.object({
   evidenceSupported: qualityStateSchema
 });
 
+export const workIdentitySnapshotSchema = z.object({
+  headline: z.string().min(1),
+  strengths: z.array(z.string().min(1)).min(1).max(6),
+  laneBridge: z.string().min(1),
+  proofConfidence: z.object({
+    strongEvidence: z.array(z.string().min(1)),
+    needsMoreDetail: z.array(z.string().min(1)),
+    safeToUseNow: z.array(z.string().min(1))
+  })
+});
+
 export const evidenceWarningSchema = z.object({
   section: z.string().min(1),
   message: z.string().min(1),
@@ -26,7 +37,7 @@ export const roleRecommendationSchema = z.object({
 
 export const packSectionSchema = z.object({
   id: z.string().min(1),
-  type: z.enum(["skills", "summary", "bullets", "linkedin", "stories", "plan"]),
+  type: z.enum(["skills", "summary", "bullets", "linkedin", "stories", "gaps", "plan"]),
   title: z.string().min(1),
   content: z.string().min(1),
   accessLevel: z.enum(["preview", "paid"]),
@@ -36,6 +47,7 @@ export const packSectionSchema = z.object({
 });
 
 export const previewPackSchema = z.object({
+  workIdentitySnapshot: workIdentitySnapshotSchema,
   roleRecommendations: z.array(roleRecommendationSchema).min(1).max(5),
   sections: z.array(packSectionSchema).min(1),
   qualityRubric: qualityRubricSchema
