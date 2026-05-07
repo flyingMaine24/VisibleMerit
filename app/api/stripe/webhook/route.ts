@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
   const payload = rawBody ? JSON.parse(rawBody) : {};
   const packId = payload?.data?.object?.metadata?.packId;
-  const result = typeof packId === "string" ? markPackPaidFromWebhook(packId) : undefined;
+  const result = typeof packId === "string" ? await markPackPaidFromWebhook(packId) : undefined;
   if (!result?.ok) {
     return Response.json({ received: true, ignored: "pack_not_found" });
   }

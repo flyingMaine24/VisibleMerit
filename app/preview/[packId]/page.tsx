@@ -2,12 +2,12 @@ import Link from "next/link";
 import { addProofDetail, startCheckout, selectRoleTargets } from "@/app/actions";
 import { AddProofDetailForm } from "@/components/AddProofDetailForm";
 import { VisibleMeritCheck } from "@/components/VisibleMeritCheck";
+import { getRepository } from "@/lib/data/repository";
 import { getPrimaryLane } from "@/lib/packs/primary-lane";
-import { getPack } from "@/lib/store";
 
 export default async function PreviewPage({ params }: { params: Promise<{ packId: string }> }) {
   const { packId } = await params;
-  const pack = getPack(packId);
+  const pack = await getRepository().getPack(packId);
   if (!pack) {
     return (
       <main className="page-shell">

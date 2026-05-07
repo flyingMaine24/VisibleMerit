@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { continueAfterLogin } from "@/app/actions";
+import { getRepository } from "@/lib/data/repository";
 import { getPrimaryLane } from "@/lib/packs/primary-lane";
-import { getPack } from "@/lib/store";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ packId?: string; next?: string }> }) {
   const { packId = "demo-pack", next = "intake" } = await searchParams;
-  const pack = getPack(packId);
+  const pack = await getRepository().getPack(packId);
   const primaryLane = pack ? getPrimaryLane(pack) : undefined;
   const loginAction = continueAfterLogin.bind(null, packId, next);
 

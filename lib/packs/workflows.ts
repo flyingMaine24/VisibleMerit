@@ -35,14 +35,14 @@ export async function createPreviewPack(
   options?: WorkflowOptions
 ): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  let pack = repository.createPack(email, intake);
+  let pack = await repository.createPack(email, intake);
   const preview = await generatePreview(intake);
 
   if (!preview.ok) {
     return { ok: false, reason: "preview_generation_failed" };
   }
 
-  pack = repository.savePack({
+  pack = await repository.savePack({
     ...pack,
     generationStatus: transitionPackStatus(
       transitionPackStatus(pack.generationStatus, "recommend_roles"),
@@ -62,7 +62,7 @@ export async function createPreviewPack(
     previewGenerationCount: pack.previewGenerationCount + 1
   });
 
-  repository.trackEvent({
+  await repository.trackEvent({
     eventName: "preview_generated",
     packId: pack.id,
     userId: pack.userId,
@@ -77,18 +77,18 @@ export async function createPreviewPack(
   return { ok: true, value: pack };
 }
 
-export function selectRoleTargetsForPack(
+export async function selectRoleTargetsForPack(
   packId: string,
   roleIds: string[],
   options?: WorkflowOptions
-): WorkflowResult<Pack> {
+): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack) return { ok: false, reason: "pack_not_found" };
 
   const selectedLimit = pack.paymentStatus === "paid" ? 3 : 1;
   const selected = roleIds.slice(0, selectedLimit);
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     selectedRoleTargetIds: selected.length ? selected : pack.selectedRoleTargetIds
   });
@@ -102,7 +102,7 @@ export async function addProofDetailToPack(
   options?: WorkflowOptions
 ): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack?.intake) return { ok: false, reason: "intake_missing" };
   if (!proofDetail.trim()) return { ok: false, reason: "empty_input" };
 
@@ -113,7 +113,7 @@ export async function addProofDetailToPack(
   const preview = await generatePreview(intake);
   if (!preview.ok) return { ok: false, reason: "preview_generation_failed" };
 
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     intake,
     workIdentitySnapshot: preview.output.workIdentitySnapshot,
@@ -123,7 +123,7 @@ export async function addProofDetailToPack(
     previewGenerationCount: pack.previewGenerationCount + 1
   });
 
-  repository.trackEvent({
+  await repository.trackEvent({
     eventName: "proof_detail_added",
     packId,
     userId: updated.userId,
@@ -134,18 +134,18 @@ export async function addProofDetailToPack(
   return { ok: true, value: updated };
 }
 
-export function startCheckoutForPack(packId: string, options?: WorkflowOptions): WorkflowResult<Pack> {
+export async function startCheckoutForPack(packId: string, options?: WorkflowOptions): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack) return { ok: false, reason: "pack_not_found" };
 
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     paymentStatus: "checkout_started",
     generationStatus: transitionPackStatus(pack.generationStatus, "start_checkout")
   });
 
-  repository.trackEvent({
+  await repository.trackEvent({
     eventName: "checkout_started",
     packId,
     userId: updated.userId,
@@ -156,24 +156,24 @@ export function startCheckoutForPack(packId: string, options?: WorkflowOptions):
   return { ok: true, value: updated };
 }
 
-export function completeLoginForPack(
+export async function completeLoginForPack(
   packId: string,
   email: string,
   next: string,
   options?: WorkflowOptions
-): WorkflowResult<Pack> {
+): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack) return { ok: false, reason: "pack_not_found" };
 
   const nextEmail = email || pack.email;
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     email: nextEmail,
     userId: `user-${nextEmail.toLowerCase()}`
   });
 
-  repository.trackEvent({
+  await repository.trackEvent({
     eventName: "login_completed",
     packId,
     userId: updated.userId,
@@ -189,14 +189,14 @@ export async function generatePaidPackForPack(
   options?: WorkflowOptions
 ): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack?.intake) return { ok: false, reason: "intake_missing" };
 
   if (pack.generationStatus === "generated" && pack.paymentStatus === "paid") {
     return { ok: true, value: pack };
   }
 
-  let updated = repository.savePack({
+  let updated = await repository.savePack({
     ...pack,
     paymentStatus: "paid",
     generationStatus: transitionPackStatus(
@@ -208,14 +208,14 @@ export async function generatePaidPackForPack(
   const primaryLane = getPrimaryLane(pack);
   const generated = await generateFullPack(pack.intake, primaryLane?.title);
   if (!generated.ok) {
-    updated = repository.savePack({
+    updated = await repository.savePack({
       ...updated,
       generationStatus: generated.error === "quality_failed" ? "needs_review" : "generation_failed"
     });
     return { ok: false, reason: "full_generation_failed" };
   }
 
-  updated = repository.savePack({
+  updated = await repository.savePack({
     ...updated,
     generationMode: "full",
     generationStatus: "generated",
@@ -225,7 +225,7 @@ export async function generatePaidPackForPack(
     qualityRubric: generated.output.qualityRubric
   });
 
-  repository.trackEvent({
+  await repository.trackEvent({
     eventName: "full_pack_generated",
     packId,
     userId: updated.userId,
@@ -239,16 +239,16 @@ export async function generatePaidPackForPack(
   return { ok: true, value: updated };
 }
 
-export function markPackPaidFromWebhook(
+export async function markPackPaidFromWebhook(
   packId: string,
   options?: WorkflowOptions
-): WorkflowResult<{ pack: Pack; duplicate: boolean }> {
+): Promise<WorkflowResult<{ pack: Pack; duplicate: boolean }>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack) return { ok: false, reason: "pack_not_found" };
   if (pack.paymentStatus === "paid") return { ok: true, value: { pack, duplicate: true } };
 
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     paymentStatus: "paid",
     generationStatus: transitionPackStatus(pack.generationStatus, "mark_paid")
@@ -262,19 +262,19 @@ export async function generateQueuedFullPack(
   options?: WorkflowOptions
 ): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   if (!pack?.intake) return { ok: false, reason: "intake_missing" };
 
   const result = await generateFullPack(pack.intake, getPrimaryLane(pack)?.title);
   if (!result.ok) {
-    repository.savePack({
+    await repository.savePack({
       ...pack,
       generationStatus: result.error === "quality_failed" ? "needs_review" : "generation_failed"
     });
     return { ok: false, reason: "full_generation_failed" };
   }
 
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     paymentStatus: "paid",
     generationMode: "full",
@@ -288,9 +288,13 @@ export async function generateQueuedFullPack(
   return { ok: true, value: updated };
 }
 
-export function rewritePackSection(packId: string, sectionId: string, options?: WorkflowOptions): WorkflowResult<Pack> {
+export async function rewritePackSection(
+  packId: string,
+  sectionId: string,
+  options?: WorkflowOptions
+): Promise<WorkflowResult<Pack>> {
   const repository = repoFrom(options);
-  const pack = repository.getPack(packId);
+  const pack = await repository.getPack(packId);
   const section = pack?.sections.find((candidate) => candidate.id === sectionId);
   if (!pack) return { ok: false, reason: "pack_not_found" };
   if (!section) return { ok: false, reason: "section_not_found" };
@@ -304,7 +308,7 @@ export function rewritePackSection(packId: string, sectionId: string, options?: 
     return { ok: false, reason: "rewrite_rejected" };
   }
 
-  const updated = repository.savePack({
+  const updated = await repository.savePack({
     ...pack,
     sections: pack.sections.map((candidate) => (candidate.id === sectionId ? nextSection : candidate)),
     qualityRubric: nextRubric

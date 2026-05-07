@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { getRepository } from "@/lib/data/repository";
 import { getPrimaryLane } from "@/lib/packs/primary-lane";
-import { listPacks } from "@/lib/store";
 
-export default function AccountPage() {
-  const packs = listPacks();
+export default async function AccountPage() {
+  const packs = await getRepository().listPacks();
 
   return (
     <main className="page-shell">

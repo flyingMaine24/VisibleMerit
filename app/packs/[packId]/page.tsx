@@ -5,13 +5,13 @@ import { PackExportActions } from "@/components/PackExportActions";
 import { PackOutlineNav } from "@/components/PackOutlineNav";
 import { PackSectionActions } from "@/components/PackSectionActions";
 import { VisibleMeritCheck } from "@/components/VisibleMeritCheck";
+import { getRepository } from "@/lib/data/repository";
 import { getArtifactMeta } from "@/lib/packs/artifacts";
 import { getPrimaryLane } from "@/lib/packs/primary-lane";
-import { getPack } from "@/lib/store";
 
 export default async function PackPage({ params }: { params: Promise<{ packId: string }> }) {
   const { packId } = await params;
-  const pack = getPack(packId);
+  const pack = await getRepository().getPack(packId);
   if (!pack) notFound();
   const warnings = pack.sections.flatMap((section) => section.evidenceWarnings);
   const primaryLane = getPrimaryLane(pack);

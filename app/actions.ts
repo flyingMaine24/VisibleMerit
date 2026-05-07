@@ -41,7 +41,7 @@ export async function submitIntake(formData: FormData) {
 }
 
 export async function selectRoleTargets(packId: string, formData: FormData) {
-  const result = selectRoleTargetsForPack(packId, formData.getAll("role").map(String));
+  const result = await selectRoleTargetsForPack(packId, formData.getAll("role").map(String));
   if (!result.ok) return;
   redirect(result.value.paymentStatus === "paid" ? `/packs/${packId}` : `/login?packId=${packId}&next=preview`);
 }
@@ -56,13 +56,13 @@ export async function addProofDetail(packId: string, formData: FormData) {
 }
 
 export async function startCheckout(packId: string) {
-  const result = startCheckoutForPack(packId);
+  const result = await startCheckoutForPack(packId);
   if (!result.ok) redirect("/intake");
   redirect(`/login?packId=${packId}&next=checkout`);
 }
 
 export async function continueAfterLogin(packId: string, next: string, formData: FormData) {
-  const result = completeLoginForPack(packId, genericFormValue(formData, "email"), next);
+  const result = await completeLoginForPack(packId, genericFormValue(formData, "email"), next);
   if (!result.ok) redirect("/intake");
 
   if (next === "checkout") redirect(`/checkout/success?packId=${packId}`);
@@ -79,5 +79,5 @@ export async function generatePaidPack(packId: string) {
 }
 
 export async function rewriteSection(packId: string, sectionId: string) {
-  rewritePackSection(packId, sectionId);
+  await rewritePackSection(packId, sectionId);
 }

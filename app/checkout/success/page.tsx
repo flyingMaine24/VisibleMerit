@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { generatePaidPack } from "@/app/actions";
-import { getPack } from "@/lib/store";
+import { getRepository } from "@/lib/data/repository";
 import { getUserVisibleStatus } from "@/lib/packs/status";
 import { getPrimaryLane } from "@/lib/packs/primary-lane";
 
 export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ packId?: string }> }) {
   const { packId: requestedPackId } = await searchParams;
   const packId = requestedPackId ?? "demo-pack";
-  const pack = getPack(packId);
+  const pack = await getRepository().getPack(packId);
   const primaryLane = pack ? getPrimaryLane(pack) : undefined;
 
   return (

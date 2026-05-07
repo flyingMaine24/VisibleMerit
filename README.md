@@ -11,7 +11,19 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-The app currently runs with a local in-memory store and mock-safe generation so the UX can be exercised before Supabase, Stripe, OpenAI, Resend, and Vercel Queues are configured.
+The app defaults to a local file-backed store at `.visible-merit/local-store.json` and mock-safe generation so the UX can be exercised before Stripe, OpenAI, Resend, and Vercel Queues are configured.
+
+Copy `.env.example` to `.env.local` for local configuration.
+
+## Persistence
+
+Visible Merit uses a repository boundary in `lib/data/repository.ts`.
+
+- Local development uses `lib/store.ts`.
+- Production can use `SupabaseRepository` by setting `VISIBLE_MERIT_REPOSITORY=supabase`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY`.
+- Apply `supabase/migrations/20260507112000_visible_merit_core.sql` before enabling the Supabase repository.
+
+The Supabase adapter is used from server-side routes/actions and stores packs as typed JSON documents with indexed top-level fields for ownership, email, payment status, and timestamps. This keeps V1 flexible while preserving a clean path to normalized tables when usage patterns are clearer.
 
 ## Quality Gates
 

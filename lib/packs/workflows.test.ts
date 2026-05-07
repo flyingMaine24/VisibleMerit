@@ -25,7 +25,7 @@ function createMemoryRepository(): VisibleMeritRepository {
   const analytics: AnalyticsEvent[] = [];
 
   return {
-    createPack(email, intake) {
+    async createPack(email, intake) {
       const pack: Pack = {
         id: `pack-${packs.size + 1}`,
         userId: `user-${email.toLowerCase()}`,
@@ -50,21 +50,21 @@ function createMemoryRepository(): VisibleMeritRepository {
       packs.set(pack.id, pack);
       return pack;
     },
-    getAnalytics() {
+    async getAnalytics() {
       return analytics;
     },
-    getPack(id) {
+    async getPack(id) {
       return packs.get(id);
     },
-    listPacks() {
+    async listPacks() {
       return Array.from(packs.values());
     },
-    savePack(pack) {
+    async savePack(pack) {
       const updated = { ...pack, updatedAt: "2026-05-07T00:00:01.000Z" };
       packs.set(updated.id, updated);
       return updated;
     },
-    trackEvent(event) {
+    async trackEvent(event) {
       analytics.push(event);
     }
   };
@@ -82,7 +82,7 @@ describe("pack workflows", () => {
       expect(result.value.selectedRoleTargetIds).toHaveLength(1);
       expect(result.value.roleRecommendations.length).toBeGreaterThan(0);
     }
-    expect(repository.getAnalytics().map((event) => event.eventName)).toContain("preview_generated");
+    expect((await repository.getAnalytics()).map((event) => event.eventName)).toContain("preview_generated");
   });
 
   it("limits role targets before payment and allows three after payment", async () => {
@@ -91,7 +91,7 @@ describe("pack workflows", () => {
     expect(preview.ok).toBe(true);
     if (!preview.ok) return;
 
-    const unpaidSelection = selectRoleTargetsForPack(
+    const unpaidSelection = await selectRoleTargetsForPack(
       preview.value.id,
       ["ops-coordinator", "implementation-specialist"],
       { repository }
@@ -99,7 +99,7 @@ describe("pack workflows", () => {
     expect(unpaidSelection.ok).toBe(true);
     if (unpaidSelection.ok) expect(unpaidSelection.value.selectedRoleTargetIds).toEqual(["ops-coordinator"]);
 
-    repository.savePack({
+    await repository.savePack({
       ...preview.value,
       paymentStatus: "paid",
       roleRecommendations: [
@@ -123,7 +123,7 @@ describe("pack workflows", () => {
       ]
     });
 
-    const paidSelection = selectRoleTargetsForPack(
+    const paidSelection = await selectRoleTargetsForPack(
       preview.value.id,
       ["ops-coordinator", "implementation-specialist", "customer-ops", "team-lead"],
       { repository }
@@ -144,24 +144,24 @@ describe("pack workflows", () => {
     expect(preview.ok).toBe(true);
     if (!preview.ok) return;
 
-    const checkout = startCheckoutForPack(preview.value.id, { repository });
+    const checkout = await startCheckoutForPack(preview.value.id, { repository });
     expect(checkout.ok).toBe(true);
     if (checkout.ok) {
       expect(checkout.value.paymentStatus).toBe("checkout_started");
       expect(checkout.value.generationStatus).toBe("checkout_started");
     }
 
-    const firstWebhook = markPackPaidFromWebhook(preview.value.id, { repository });
+    const firstWebhook = await markPackPaidFromWebhook(preview.value.id, { repository });
     expect(firstWebhook.ok).toBe(true);
     if (firstWebhook.ok) {
       expect(firstWebhook.value.duplicate).toBe(false);
       expect(firstWebhook.value.pack.paymentStatus).toBe("paid");
     }
 
-    const secondWebhook = markPackPaidFromWebhook(preview.value.id, { repository });
+    const secondWebhook = await markPackPaidFromWebhook(preview.value.id, { repository });
     expect(secondWebhook.ok).toBe(true);
     if (secondWebhook.ok) expect(secondWebhook.value.duplicate).toBe(true);
 
-    expect(repository.getAnalytics().map((event) => event.eventName)).toContain("checkout_started");
+    expect((await repository.getAnalytics()).map((event) => event.eventName)).toContain("checkout_started");
   });
 });
