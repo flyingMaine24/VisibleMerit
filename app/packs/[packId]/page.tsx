@@ -5,6 +5,7 @@ import { PackExportActions } from "@/components/PackExportActions";
 import { PackOutlineNav } from "@/components/PackOutlineNav";
 import { PackSectionActions } from "@/components/PackSectionActions";
 import { VisibleMeritCheck } from "@/components/VisibleMeritCheck";
+import { getArtifactMeta } from "@/lib/packs/artifacts";
 import { getPrimaryLane } from "@/lib/packs/primary-lane";
 import { getPack } from "@/lib/store";
 
@@ -94,32 +95,49 @@ export default async function PackPage({ params }: { params: Promise<{ packId: s
             </form>
           </section>
 
-          {pack.sections.map((section, index) => (
-            <article className="proof-section pack-artifact" id={section.id} key={section.id}>
-              <header className="artifact-heading">
-                <div>
-                  <span className="proof-label">{section.accessLevel}</span>
-                  <h2>{section.title}</h2>
-                </div>
-                <span className="artifact-number">{String(index + 2).padStart(2, "0")}</span>
-              </header>
-              {section.before && (
-                <p className="section-before">
-                  <strong>Before:</strong> {section.before}
-                </p>
-              )}
-              <p className="section-content">{section.content}</p>
-              {section.whyItWorks && <p className="why section-why">Why it works: {section.whyItWorks}</p>}
-              {section.evidenceWarnings.map((warning) => (
-                <div className="notice" key={warning.message}>{warning.message}</div>
-              ))}
-              <form action={rewriteSection.bind(null, pack.id, section.id)} className="action-bar artifact-actions no-print">
-                <PackSectionActions text={`${section.title}\n\n${section.content}`} />
-                <button type="submit" className="ghost"><RefreshCcw size={16} /> Sounds too fake</button>
-              </form>
-            </article>
-          ))}
-          <PackExportActions email={pack.email} packTitle={packTitle} sections={pack.sections} />
+          {pack.sections.map((section, index) => {
+            const artifact = getArtifactMeta(section);
+            const copyText = [
+              artifact.exportName,
+              `Recommended use: ${artifact.use}`,
+              section.before ? `Before: ${section.before}` : "",
+              section.content,
+              section.whyItWorks ? `Why it works: ${section.whyItWorks}` : ""
+            ].filter(Boolean).join("\n\n");
+
+            return (
+              <article className="proof-section pack-artifact" id={section.id} key={section.id}>
+                <header className="artifact-heading">
+                  <div>
+                    <span className="proof-label">{artifact.label}</span>
+                    <h2>{section.title}</h2>
+                    <p>{artifact.use}</p>
+                  </div>
+                  <span className="artifact-number">{String(index + 2).padStart(2, "0")}</span>
+                </header>
+                {section.before && (
+                  <p className="section-before">
+                    <strong>Before:</strong> {section.before}
+                  </p>
+                )}
+                <p className="section-content">{section.content}</p>
+                {section.whyItWorks && <p className="why section-why">Why it works: {section.whyItWorks}</p>}
+                {section.evidenceWarnings.map((warning) => (
+                  <div className="notice" key={warning.message}>{warning.message}</div>
+                ))}
+                <form action={rewriteSection.bind(null, pack.id, section.id)} className="action-bar artifact-actions no-print">
+                  <PackSectionActions label="artifact" text={copyText} />
+                  <button type="submit" className="ghost"><RefreshCcw size={16} /> Sounds too fake</button>
+                </form>
+              </article>
+            );
+          })}
+          <PackExportActions
+            email={pack.email}
+            packTitle={packTitle}
+            primaryLaneTitle={primaryLane?.title}
+            sections={pack.sections}
+          />
         </section>
 
         <div className="quality-sidebar no-print">

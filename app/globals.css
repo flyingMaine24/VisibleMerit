@@ -1182,6 +1182,14 @@ textarea {
   max-width: 760px;
 }
 
+.artifact-heading p {
+  color: #3f4743;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 10px;
+  max-width: 680px;
+}
+
 .artifact-number {
   align-items: center;
   background: var(--color-deep-ink);
@@ -1197,6 +1205,9 @@ textarea {
 }
 
 .section-content {
+  color: #151918;
+  font-size: 18px;
+  max-width: 820px;
   white-space: pre-line;
 }
 
@@ -1213,7 +1224,34 @@ textarea {
 }
 
 .workspace-actions {
+  align-items: center;
+  background: #fff8e8;
+  border-top: 1px solid var(--color-line);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) auto;
   padding: 24px;
+}
+
+.workspace-actions span {
+  color: var(--color-growth-green);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.workspace-actions strong {
+  display: block;
+  font-size: 20px;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.workspace-actions p {
+  color: #3f4743;
+  margin-top: 6px;
 }
 
 .account-list {
@@ -1363,6 +1401,11 @@ textarea {
   }
 
   .proof-confidence {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-actions {
+    align-items: start;
     grid-template-columns: 1fr;
   }
 }
@@ -1515,6 +1558,19 @@ textarea {
   .section-before,
   .section-why {
     font-size: 12px;
+  }
+
+  .artifact-heading {
+    display: block;
+  }
+
+  .artifact-heading p {
+    color: #333333;
+    font-size: 11px;
+  }
+
+  .artifact-number {
+    display: none;
   }
 
   .notice {
