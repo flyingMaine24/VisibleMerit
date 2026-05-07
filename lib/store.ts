@@ -4,9 +4,7 @@ import type { AnalyticsEvent, IntakeAnswers, Pack } from "@/lib/types";
 import { createQualityRubric } from "@/lib/editorial/standard";
 
 const now = () => new Date().toISOString();
-const localStorePath =
-  process.env.VISIBLE_MERIT_STORE_PATH ??
-  join(/*turbopackIgnore: true*/ process.cwd(), ".visible-merit", "local-store.json");
+const localStorePath = process.env.VISIBLE_MERIT_STORE_PATH ?? join(".visible-merit", "local-store.json");
 
 const demoAnswers: IntakeAnswers = {
   currentRole: "Ramp agent",

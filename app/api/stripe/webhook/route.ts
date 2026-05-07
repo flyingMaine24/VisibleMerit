@@ -1,5 +1,4 @@
-import { getPack, savePack } from "@/lib/store";
-import { transitionPackStatus } from "@/lib/packs/status";
+import { markPackPaidFromWebhook } from "@/lib/packs/workflows";
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -11,21 +10,14 @@ export async function POST(request: Request) {
 
   const payload = rawBody ? JSON.parse(rawBody) : {};
   const packId = payload?.data?.object?.metadata?.packId;
-  const pack = typeof packId === "string" ? getPack(packId) : undefined;
-
-  if (!pack) {
+  const result = typeof packId === "string" ? markPackPaidFromWebhook(packId) : undefined;
+  if (!result?.ok) {
     return Response.json({ received: true, ignored: "pack_not_found" });
   }
 
-  if (pack.paymentStatus === "paid") {
+  if (result.value.duplicate) {
     return Response.json({ received: true, duplicate: true });
   }
-
-  savePack({
-    ...pack,
-    paymentStatus: "paid",
-    generationStatus: transitionPackStatus(pack.generationStatus, "mark_paid")
-  });
 
   return Response.json({ received: true });
 }

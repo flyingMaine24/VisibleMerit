@@ -1,6 +1,7 @@
-import { getAnalytics, listPacks } from "@/lib/store";
+import { getRepository } from "@/lib/data/repository";
 
 export async function GET() {
+  const repository = getRepository();
   const rows = [
     [
       "created_date",
@@ -16,7 +17,7 @@ export async function GET() {
       "quality_bucket",
       "generation_failure_code"
     ],
-    ...listPacks().map((pack) => [
+    ...repository.listPacks().map((pack) => [
       pack.createdAt,
       "frontline",
       pack.intake?.currentRole ?? "",
@@ -33,7 +34,7 @@ export async function GET() {
   ];
 
   // Touch analytics so this route exercises the allowlisted event path without exposing raw private text.
-  void getAnalytics();
+  void repository.getAnalytics();
 
   const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
   return new Response(csv, {
